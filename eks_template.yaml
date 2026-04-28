@@ -1,0 +1,23 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${AWS_REGION}
+  version: "${K8S_VERSION}"
+
+vpc:
+  cidr: ${VPC_CIDR}
+
+managedNodeGroups:
+  - name: ${DEFAULT_NODE_GROUP_NAME}
+    instanceType: ${DEFAULT_INSTANCE_TYPE}
+    minSize: ${DEFAULT_MIN_NODES}
+    maxSize: ${DEFAULT_MAX_NODES}
+    desiredCapacity: ${DEFAULT_DESIRED_NODES}
+    volumeSize: ${DEFAULT_VOLUME_SIZE}
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        cloudWatch: true
