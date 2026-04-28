@@ -17,7 +17,7 @@ DEFAULT_INSTANCE_TYPE ?= g4dn.8xlarge
 DEFAULT_MIN_NODES ?= 1
 DEFAULT_MAX_NODES ?= 3
 DEFAULT_DESIRED_NODES ?= 2
-VOLUME_SIZE ?= 50
+DEFAULT_VOLUME_SIZE ?= 50
 GPU_OPERATOR_VERSION ?= v26.3.1
 
 help:
@@ -30,7 +30,7 @@ help:
 	@echo "  cluster-delete - Delete the EKS cluster and all associated resources"
 	@echo "  cluster-kubeconfig - Update local kubeconfig to connect to the cluster"
 	@echo "  deploy-gpuoperator - Deploy Nvidia GPU Operator"
-	
+
 check-dependencies:
 	@echo "Checking dependencies..."
 	@which eksctl >/dev/null 2>&1 || { echo "Error: eksctl is not installed. Please install it from https://eksctl.io/"; exit 1; }
