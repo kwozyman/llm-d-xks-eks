@@ -7,11 +7,14 @@ endif
 export
 
 # Fallback defaults in case .env is missing or specific vars are not set
-TEMPLATE_FILE ?= eks_template.yaml
+TEMPLATE_FILE ?= eks-template.yaml
 CLUSTER_NAME ?= cgament-llmd-1
 AWS_REGION ?= us-east-1
+AWS_AZ ?= us-east-1a
 K8S_VERSION ?= 1.30
 VPC_CIDR ?= 10.0.0.0/16
+ENABLE_EFA ?= true
+ENABLE_PRIVATE_NETWORKING ?= true
 DEFAULT_NODE_GROUP_NAME ?= gpu-node-group
 DEFAULT_INSTANCE_TYPE ?= g4dn.8xlarge
 DEFAULT_MIN_NODES ?= 1

@@ -21,3 +21,7 @@ managedNodeGroups:
       withAddonPolicies:
         autoScaler: true
         cloudWatch: true
+    efaEnabled: ${ENABLE_EFA}
+    privateNetworking: ${ENABLE_PRIVATE_NETWORKING}
+    availabilityZones:
+      - "${AWS_AZ}"

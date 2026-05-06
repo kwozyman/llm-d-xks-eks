@@ -4,8 +4,8 @@ This repository provides a small `Makefile`-driven workflow to create and manage
 
 ## Committed Files Used
 
-- `Makefile`: automation targets for dependency checks, cluster lifecycle, kubeconfig, and GPU Operator deployment
-- `eks_template.yaml`: `eksctl` cluster template rendered via environment variables
+- `Makefile`: dependency checks, cluster lifecycle, kubeconfig, and NVIDIA GPU Operator deployment via Helm
+- `eks-template.yaml`: `eksctl` cluster template rendered with `envsubst` from environment variables
 
 ## Prerequisites
 
@@ -19,15 +19,18 @@ AWS credentials and permissions must be configured in your environment before ru
 
 ## Configuration
 
-The `Makefile` loads variables from `.env` when present and provides defaults otherwise.
+The `Makefile` loads variables from `.env` file in when specified by `$TEMPLATE_FILE` or applies defaults otherwise.
 
 Default values:
 
-- `TEMPLATE_FILE=eks_template.yaml`
+- `TEMPLATE_FILE=eks-template.yaml`
 - `CLUSTER_NAME=cgament-llmd-1`
 - `AWS_REGION=us-east-1`
+- `AWS_AZ=us-east-1a`
 - `K8S_VERSION=1.30`
 - `VPC_CIDR=10.0.0.0/16`
+- `ENABLE_EFA=true`
+- `ENABLE_PRIVATE_NETWORKING=true`
 - `DEFAULT_NODE_GROUP_NAME=gpu-node-group`
 - `DEFAULT_INSTANCE_TYPE=g4dn.8xlarge`
 - `DEFAULT_MIN_NODES=1`
@@ -36,19 +39,23 @@ Default values:
 - `DEFAULT_VOLUME_SIZE=50`
 - `GPU_OPERATOR_VERSION=v26.3.1`
 
-You can override any value either in `.env` or inline:
+Override values in `.env` or on the command line:
 
 ```bash
-make cluster-create CLUSTER_NAME=my-cluster AWS_REGION=eu-central-1
+make cluster-create CLUSTER_NAME=my-cluster AWS_REGION=eu-central-1 AWS_AZ=eu-central-1a
 ```
 
+For GPU instance types that support EFA (for example `p4d.24xlarge`), keep `ENABLE_EFA=true` unless your account or capacity constraints require disabling it.
+
 ## Make Targets
+
+Run `make help` for a short usage summary.
 
 - `make check-dependencies`  
   Validates required CLIs are installed.
 
 - `make cluster-show-template`  
-  Renders `eks_template.yaml` with current environment values.
+  Renders `eks-template.yaml` with current environment values (stdout only).
 
 - `make cluster-create`  
   Renders the template and creates the EKS cluster with `eksctl`.
@@ -60,7 +67,7 @@ make cluster-create CLUSTER_NAME=my-cluster AWS_REGION=eu-central-1
   Writes kubeconfig for local `kubectl` access.
 
 - `make deploy-gpuoperator`  
-  Installs NVIDIA GPU Operator via Helm (namespace `gpu-operator`).
+  Adds the NVIDIA Helm repo and installs GPU Operator in namespace `gpu-operator`, with `driver.rdma.enabled=true`.
 
 ## Typical Workflow
 
@@ -74,9 +81,13 @@ make deploy-gpuoperator
 
 ## Cluster Template Notes
 
-The committed `eks_template.yaml` defines:
+The committed `eks-template.yaml` defines:
 
-- cluster metadata (`name`, `region`, `version`)
-- VPC CIDR block
-- one managed node group with autoscaler and CloudWatch addon policies enabled
+- Cluster metadata (`name`, `region`, `version`)
+- VPC CIDR
+- One managed node group with autoscaler and CloudWatch IAM addon policies
+- **EFA** on the node group (`efaEnabled` from `ENABLE_EFA`)
+- **Private networking** for the node group (`privateNetworking` from `ENABLE_PRIVATE_NETWORKING`)
+- A single availability zone for the node group (`AWS_AZ`)
 
+Adjust `AWS_AZ` to match your chosen region (for example `eu-central-1a` when `AWS_REGION` is `eu-central-1`).
